@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(uuid())
+  name             String
+  phone            String
+  email            String    @unique
+  password         String
+  type             UserType
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+  homes            Home[]
+  buyer_messages   Message[] @relation("buyer_messages")
+  realtor_messages Message[] @relation("realtor_messages")
+}
+
+model Home {
+  id                  String       @id @default(uuid())
+  name                String
+  address             String
+  number_of_bedrooms  Int
+  number_of_bathrooms Int
+  city                String
+  listed_date         DateTime
+  price               Float
+  land_size           Float
+  propertyType        PropertyType
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  Image               Image[]
+  realtor_id          String
+  realtor             User         @relation(fields: [realtor_id], references: [id])
+  messages            Message[]
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  url        String
+  home_id    String
+  home       Home     @relation(fields: [home_id], references: [id])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Message {
+  id         String @id @default(uuid())
+  message    String
+  home_id    String
+  home       Home   @relation(fields: [home_id], references: [id])
+  realtor_id String
+  realtor    User   @relation(fields: [realtor_id], references: [id], name: "realtor_messages")
+  buyer_id   String
+  buyer      User   @relation(fields: [buyer_id], references: [id], name: "buyer_messages")
+}
+
+
+
+enum UserType {
+  BUYER
+  REALTOR
+  ADMIN
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  TOWNHOUSE
+  VILLA
+  CONDO
+  DUPLEX
+  FARM
+  LAND
+  MOBILE
+  OTHER
+}
